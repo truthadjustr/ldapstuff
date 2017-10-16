@@ -1,0 +1,15 @@
+{
+  "name": "ldapstuff",
+  "version": "1.0.0",
+  "description": "",
+  "main": "getgroupsof.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node getgroupsof.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ldapjs": "^1.0.1"
+  }
+}
