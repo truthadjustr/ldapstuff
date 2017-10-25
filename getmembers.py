@@ -4,9 +4,10 @@ import datetime
 import os
 import redis
 import sys
+import json
 
 if len(sys.argv) != 2:
-    print "USAGE: python getmembers.py BLUE_GROUP_NAME_HERE"
+    print "USAGE: python getmembers.py SPRINT_ECK_USER"
     sys.exit(1)
 
 bluegroup = sys.argv[1]
@@ -41,21 +42,25 @@ try:
         nfo_tuple2 = ldap_result2_id[0]
         memberinfo = nfo_tuple2[1]
 
-        # 'emailAddress' key is not guaranteed
-        if isinstance(memberinfo['mail'],list):
-            emailaddr = ';'.join(memberinfo['mail']) 
-        else:
-            emailaddr = memberinfo['mail'] 
+        try:
+            # 'emailAddress' key is not guaranteed
+            if isinstance(memberinfo['mail'],list):
+                emailaddr = ';'.join(memberinfo["mail"]) 
+            else:
+                emailaddr = memberinfo["mail"] 
+        except:
+            #print "cannot find mail in:",json.dumps(memberinfo)
+            emailaddr = "N/A"
 
         # handle a certain quirks in IBM LDAP
         notesId = ''
-        for e in ['notesid','notesId','notesemail','notesEmail']: 
+        for e in ["notesid","notesId","notesemail","notesEmail"]: 
             if e in memberinfo:
                 notesId = memberinfo[e][0]
                 break
 
         role = ''
-        for role_field in ['jobresponsibilities','jobResponsibilities']:
+        for role_field in ["jobresponsibilities","jobResponsibilities"]:
             field_type = memberinfo.get(role_field)
             if field_type is not None:
                 if isinstance(field_type,list):
@@ -65,12 +70,12 @@ try:
                     role = memberinfo.get(role_field)
                     break
 
-        memberdata = { 'notesEmail': notesId, 'mail': emailaddr,'role': role }
+        memberdata = { "notesEmail": notesId, "mail": emailaddr,"role": role }
         if cache:
             if not cache.sismember(DstGroup,memberdata):
                 cache.sadd(DstGroup,memberdata)
         else:
-            print memberdata
+            print json.dumps(memberdata)
 
 except ldap.FILTER_ERROR,e:
     print "filter error"
